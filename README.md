@@ -1,12 +1,6 @@
 # DS Comments
 
-[![tests](https://github.com/ochen-beep/SillyTavern-DS-Comments/actions/workflows/tests.yml/badge.svg)](https://github.com/ochen-beep/SillyTavern-DS-Comments/actions/workflows/tests.yml)
-
-A [SillyTavern](https://docs.sillytavern.app/) extension that generates a separate Discord-style "spectator comments" feed for the current chat scene via its own LLM request. The chat text, swipes, and scroll position are never modified.
-
-**English** · [Русский](USER_GUIDE.md)
-
-> This extension interacts with [SillyTavern](https://github.com/SillyTavern/SillyTavern) (AGPL-3.0) through its public extension API and contains no SillyTavern code.
+A SillyTavern extension that generates a separate Discord-style "spectator comments" feed for the current chat scene via its own LLM request. The chat text, swipes, and scroll position are never modified.
 
 ## Features
 
@@ -71,14 +65,6 @@ A detailed walkthrough — in Russian, with template editing, lorebooks, the jai
 - Jailbreak role **Assistant** is a trailing-assistant prefill: OpenAI-compatible APIs generally continue it, while the newest Claude models reject trailing assistant messages with an API error.
 - With the lorebook scope set to "attached only", manually regenerating an older post/swipe can produce an empty lore block — there is no fresh activation data for that point in the chat.
 
-## See also
-
-This extension was inspired by [SillyTavern-EchoChamber](https://github.com/mattjaybe/SillyTavern-EchoChamber). If you want a different take on the idea — with more emphasis on chat design — give it a try.
-
-## License
-
-Released under the [GNU AGPL-3.0 License](LICENSE).
-
 ---
 
 ### Technical details
@@ -106,10 +92,6 @@ Built-in sounds live in the extension's `sounds/` folder. User-uploaded sounds a
 - The full trace is included in the dump when Debug mode is enabled.
 - In normal mode the browser console stays quiet (one init line, warnings/errors); the success path goes to the debug ring only.
 - When reporting an issue, attach the dump along with reproduction steps: the chat/swipe involved, the user action, whether a cache hit was expected, whether noSaveMode was on, and whether the error happened after a reload or a chat switch.
-
-#### Development
-
-`npm test` runs the suite with Node's built-in test runner; no jsdom needed — `test-helpers/stub-runtime.mjs` stubs the DOM/SillyTavern surface.
 
 #### i18n
 
