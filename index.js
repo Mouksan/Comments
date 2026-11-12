@@ -66,7 +66,7 @@ import { createPermanentRegistrationController } from './src/registration-lifecy
 import { buildDscommentsCommand } from './src/slash-commands.js';
 import { loadPinnedFeeds, flushPinnedPersist } from './src/pinned-store.js';
 import { loadEventLog, flushEventLog, clearEventLog, dumpEventLog, recordEvent } from './src/event-log.js';
-import { feedStoreSnapshot, loadFeedStore } from './src/feed-file-store.js';
+import { feedStoreSnapshot, loadFeedStore, flushFeedStoreWrites } from './src/feed-file-store.js';
 
 // ── Lifecycle Hooks ──
 
@@ -781,6 +781,10 @@ function abortActiveGeneration() {
     state.generationInProgress = false;
     state.generationTarget = null;
     state.generationObservedTarget = null;
+    // A parked one-slot queue entry must not outlive the abort: its epoch is
+    // now stale, and a surviving entry would be drained by the next completed
+    // generation — running a request the user just cancelled/cleared.
+    state.queuedGeneration = null;
 }
 
 /** Clear feed + cache for current chat. */
@@ -1010,6 +1014,9 @@ function onVisibilityChange() {
     flushApiKey();
     flushGiphyKey();
     flushPinnedPersist();
+    // Feed-file writes are coalesced on a short debounce; a write made in the
+    // last debounce window must land before the page freezes.
+    flushFeedStoreWrites();
     flushEventLog();
     // saveMetadata() is an alias for saveChatConditional(), which writes the
     // WHOLE in-memory chat array to the chat file. During a chat switch or close
@@ -1078,5 +1085,8 @@ function cleanup() {
     teardownWindowRuntime();
     destroyFeedGestures();   // remove panel-bound touch/wheel listeners before removePanel unbinds the DOM
     removePanel();
+    // Fire-and-forget: a debounced feed write must land even though the page
+    // listeners are gone; onClean's clear path re-flushes before its delete.
+    flushFeedStoreWrites();
     log('Cleanup completed');
 }
