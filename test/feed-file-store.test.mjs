@@ -313,6 +313,19 @@ describe('slot keys', () => {
 });
 
 describe('setFeedSlot / getFeedSlot', () => {
+    test('a greeting write marks the chat tainted so ST stops rebuilding the greeting', async () => {
+        globalThis._stCtx.chatId = 'c1';
+        globalThis._stCtx.chat = [
+            makeMsg({ swipe_info: [slotInfo('2026-08-19T10:00:00.000Z')] }),
+            makeMsg({ swipe_info: [slotInfo('2026-08-19T10:05:00.000Z')] }),
+        ];
+        await loadFeedStore();
+        assert.equal(setFeedSlot('1', 0, 'later message'), true);
+        assert.notEqual(globalThis._stCtx.chatMetadata.tainted, true, 'only the greeting taints');
+        assert.equal(setFeedSlot('0', 0, 'greeting feed'), true);
+        assert.equal(globalThis._stCtx.chatMetadata.tainted, true);
+    });
+
     test('write → mirror + upload; reload round-trips', async () => {
         globalThis._stCtx.chatId = 'c1';
         globalThis._stCtx.chat = [makeMsg({

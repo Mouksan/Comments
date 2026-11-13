@@ -550,7 +550,16 @@ export function setFeedSlot(msgId, swipeIdx, html, generationFp = null, threads 
         threads: Array.isArray(threads) && threads.length ? threads : null,
     };
     _mirrorRevision++;
-    if (minted) persistChatMetadata(ctx);
+    // While the greeting is the only message, ST rebuilds it from the card on a
+    // persona switch (including a chat-locked persona applied on page load) or a
+    // card edit: fresh send_date, so this feed would be orphaned. Marking the
+    // chat tainted — the same flag ST sets after the first message — stops that.
+    let tainted = false;
+    if (parseInt(msgId, 10) === 0 && ctx?.chatMetadata && !ctx.chatMetadata.tainted) {
+        ctx.chatMetadata.tainted = true;
+        tainted = true;
+    }
+    if (minted || tainted) persistChatMetadata(ctx);
     schedulePersist({ ctx, key: _loadedKey ?? chatFileKey(ctx), mirror: _mirror });
     return true;
 }
